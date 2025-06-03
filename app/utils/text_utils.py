@@ -7,7 +7,7 @@ from io import BytesIO
 
 
 
-def text_extract(pdf_stream):
+async def text_extract(pdf_stream):
     """
     Extracts text and OCRs images from a PDF in a BytesIO stream.
     

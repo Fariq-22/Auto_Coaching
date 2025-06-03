@@ -1,11 +1,12 @@
 from pydantic import BaseModel,Field
-from typing import Optional
+from typing import Optional,List
 
 
 class Section_creation(BaseModel):
     client_id :str = Field(...,description="The client id to retrive the documents")
     test_id : str = Field(...,description="The test id of the client")
-    link : str = Field(...,description="The link of the documenst")
+    # link : str = Field(...,description="The link of the documenst")
+    link: List[str] = Field(..., description="List of document links")
 
 
 class Questions(BaseModel):

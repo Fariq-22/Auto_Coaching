@@ -19,15 +19,18 @@ router = APIRouter()
 
     - client_id: ID of the client
     - Test id : Test id of the client
-    - link : Link of the dodument
+    - link : List of linkS
     """)
 async def section_generation(payload:Section_creation):
     parser = JsonOutputParser()
     try:
         logging.info(f"processing {payload.link}")
-        download_file_from_s3 = download_with_presigned(payload.link)
-        extracted_text =text_extract(download_file_from_s3) #TODO: make async
-        raw_result = summarizer_with_llm(extracted_text)
+        all_text=""
+        for li in payload.link:
+            download_file_from_s3 = await download_with_presigned(li)
+            extracted_text =await text_extract(download_file_from_s3) #TODO: make async
+            all_text+=extracted_text
+        raw_result = await summarizer_with_llm(all_text)
         try:
 
             parsed_result = parser.parse(raw_result)

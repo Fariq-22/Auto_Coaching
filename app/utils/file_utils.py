@@ -2,7 +2,7 @@ import io
 import requests
 
 # Download PDF from URL
-def download_with_presigned(url):
+async def download_with_presigned(url):
     """
     Download the file via s3 url
     Args:

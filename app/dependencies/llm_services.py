@@ -114,7 +114,7 @@ Critical requirements:
 
 
 
-def summarizer_with_llm(document_text):
+async def summarizer_with_llm(document_text):
     """
     Use Gemini model to analyze and summarize the given document text
     into logical sections with summaries and key points.
@@ -134,7 +134,7 @@ def summarizer_with_llm(document_text):
         return e
 
 
-def question_generator(section,info):
+async def question_generator(section,info):
     '''
     The information for info
       type_of_question
