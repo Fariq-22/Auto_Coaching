@@ -18,6 +18,7 @@ router = APIRouter()
     Generates Summary of the Document with client_id,document_link
 
     - client_id: ID of the client
+    - Test id : Test id of the client
     - link : Link of the dodument
     """)
 async def section_generation(payload:Section_creation):
@@ -32,10 +33,10 @@ async def section_generation(payload:Section_creation):
             parsed_result = parser.parse(raw_result)
         except Exception as pe:
             logging.exception("Failed to parse LLM response")
-            await dump_section_data(None, payload.client_id, payload.link, error=f"ParseError: {str(pe)}")
+            await dump_section_data(data=None, client_id=payload.client_id, test_id=payload.test_id,link=payload.link, error=f"ParseError: {str(pe)}")
             return JSONResponse(status_code=500, content={"message": "Invalid response format from LLM"})
 
-        await dump_section_data(parsed_result, payload.client_id, payload.link)
+        await dump_section_data(data=parsed_result, client_id=payload.client_id, test_id=payload.test_id,link=payload.link)
         return JSONResponse(status_code=200, content=parsed_result)
     
     except Exception as e:

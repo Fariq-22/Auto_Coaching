@@ -3,7 +3,8 @@ from typing import Optional
 
 
 class Section_creation(BaseModel):
-    client_id :str = Field(...,description="the client id to retrive the documents")
+    client_id :str = Field(...,description="The client id to retrive the documents")
+    test_id : str = Field(...,description="The test id of the client")
     link : str = Field(...,description="The link of the documenst")
 
 
@@ -11,7 +12,8 @@ class Questions(BaseModel):
     '''
         The Validator used to validate the question information
     '''
-    client_id :str = Field(...,description="the client id to retrive the documents")
+    client_id :str = Field(...,description="The client id to retrive the documents")
+    test_id : str = Field(...,description="The test id for filter with client")
     section_id: int =Field(...,description="To retrive the section information")
     question_type: str = Field(...,description="The type of questions need  to generated subjective or objective")
     num_questions: int =Field(...,description="The Number of questions need to be generated")
