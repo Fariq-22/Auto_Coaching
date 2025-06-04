@@ -30,3 +30,18 @@ async def dump_questions(questions,client_id,test_id,section_id,error=None):
         }
     await db["Question_Creation"].insert_one(document)
 
+
+
+async def dump_conversation(conv,client_id,test_id,section_id,error=None):
+    _, db = get_mongodb_connection()
+    document={
+        "_id" : str(uuid.uuid4()) + str(datetime.datetime.now().timestamp()),
+        "client_id":client_id,
+        "test_id":test_id,
+        "section_id":section_id,
+        "document_name" : "AutoCoahing_documents",
+        "added_at": datetime.datetime.now().isoformat(),
+        "Conversation":conv,
+        "error": error
+        }
+    await db["Conversation_Creation"].insert_one(document)

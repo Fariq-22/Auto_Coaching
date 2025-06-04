@@ -31,8 +31,7 @@ async def question_generation(payload: Questions):
         ques_generation=await question_generator(section=section,info=ques_info)
         logging.info("Storing the data in mongo db")
         try:
-                parsed_result = parser.parse(ques_generation)
-                print(parsed_result)
+            parsed_result = parser.parse(ques_generation)
         except Exception as pe:
                 logging.exception("Failed to parse LLM response")
                 await dump_questions(questions=None, client_id=payload.client_id, test_id=payload.test_id,section_id=payload.section_id, error=f"ParseError: {str(pe)}")

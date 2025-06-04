@@ -20,3 +20,24 @@ async def section_retrieval_for_question_gen(client_id, test_id, section_id):
         raise HTTPException(status_code=404, detail="Section not found")
 
     return doc["sections"][0]
+
+
+async def section_retrival_for_conversation(client_id, test_id, section_id):
+    _, db = get_mongodb_connection()
+
+    doc = await db["Document_Sections"].find_one(
+        {
+            "client_id": client_id,
+            "test_id": test_id,
+            "sections.id": section_id
+        },
+        {
+            "sections": {"$elemMatch": {"id": section_id}},
+            "_id": 0
+        }
+    )
+    
+    if doc["sections"][0]['is_conversation'] == 'false':
+        raise HTTPException(status_code=404, detail="The Section is not elibile for creating conversation")
+
+    return doc["sections"][0]

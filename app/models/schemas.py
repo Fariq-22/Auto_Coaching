@@ -19,3 +19,11 @@ class Questions(BaseModel):
     question_type: str = Field(...,description="The type of questions need  to generated subjective or objective")
     num_questions: int =Field(...,description="The Number of questions need to be generated")
     num_options: Optional[int] = Field(None, description="Number of options (only for objective questions)")
+
+class Conversational(BaseModel):
+    '''
+        Used for the Conversatinal Creation
+    '''
+    client_id:str = Field(...,description="The client id for data retrival")
+    test_id : str = Field(...,description="The test_if for matching the test")
+    section_id:int = Field(...,description="The section id for the data retrivak")

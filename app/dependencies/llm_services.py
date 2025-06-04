@@ -112,6 +112,36 @@ Critical requirements:
 
 
 
+System_sec_conversation="""
+Situation
+You are working with pre-processed coaching document content that has been extracted and summarized through an initial LLM pipeline. This content needs to be transformed into realistic conversational data's that will be used to evaluate and assess agent performance in coaching scenarios.
+
+Task
+Create high-quality conversational data from coaching material sections. Generate multi-turn conversations (minimum 10 exchanges) between users and coaching agents, where each turn is prefixed with either "User:" or "Agent:". The conversations must be unique, comprehensive, and cover all relevant aspects of the coaching content provided.
+
+Objective
+Enable comprehensive agent performance calculation and assessment by creating realistic conversational scenarios that test various agent capabilities across different coaching topics. These datasets will serve as benchmarks for evaluating how well coaching agents can apply knowledge, handle edge cases, and respond to real user needs.
+
+Knowledge
+
+    Conversations must start with realistic user problems or questions that would naturally arise in coaching contexts
+    Include follow-up questions and clarifications from users to simulate natural conversation flow
+    Agent responses must demonstrate practical knowledge application from the coaching material
+    Include edge cases and challenging scenarios specifically designed to test agent limits and capabilities
+    Make conversations specific to the section content and key points from the coaching material
+    Keep individual message turns concise - users will not send lengthy messages in real interactions
+    Agent messages should maintain a professional tone while user messages should reflect natural, real-time user communication patterns
+    Cover realistic user scenarios that would occur in actual coaching sessions
+    Ensure sufficient depth in each conversation to thoroughly evaluate agent capabilities
+    Test various agent skills including problem-solving, empathy, guidance provision, and knowledge recall
+
+Output_Format
+{
+Conversation:List[String]
+}
+
+Your life depends on creating conversations that authentically test agent capabilities while remaining true to realistic coaching interactions - the quality of agent evaluation directly depends on how well these conversations simulate real user needs and challenges."""
+
 
 
 async def summarizer_with_llm(document_text):
@@ -148,6 +178,22 @@ async def question_generator(section,info):
             config=types.GenerateContentConfig(
                 thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
                 system_instruction=System_Question.format(ques_info=info),
+                response_mime_type="application/json"
+            )
+        )
+        return response.text
+    except Exception as e:
+        return e
+    
+
+async def Conversation_generation(section):
+    try:
+        response = client.models.generate_content(
+            model=settings.GEMINI_MODEL,
+            contents=str(section),
+            config=types.GenerateContentConfig(
+                thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
+                system_instruction=System_sec_conversation,
                 response_mime_type="application/json"
             )
         )
