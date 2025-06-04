@@ -27,3 +27,10 @@ class Conversational(BaseModel):
     client_id:str = Field(...,description="The client id for data retrival")
     test_id : str = Field(...,description="The test_if for matching the test")
     section_id:int = Field(...,description="The section id for the data retrivak")
+
+class Prompt(BaseModel):
+    '''
+        Used for Section Enhancement
+    '''
+    client_id : str = Field(...,description="The Clint id for retrive the Document")
+    test_id : str = Field(...,description="The Test id to match the test ")
