@@ -34,3 +34,4 @@ class Prompt(BaseModel):
     '''
     client_id : str = Field(...,description="The Clint id for retrive the Document")
     test_id : str = Field(...,description="The Test id to match the test ")
+    user_prompt : str =Field(...,description="The prompt for section enhancement")

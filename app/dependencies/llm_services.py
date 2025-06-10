@@ -143,6 +143,35 @@ Conversation:List[String]
 Your life depends on creating conversations that authentically test agent capabilities while remaining true to realistic coaching interactions - the quality of agent evaluation directly depends on how well these conversations simulate real user needs and challenges."""
 
 
+system_improved_sections="""
+Situation
+You are working with document content that has already been processed through an initial extraction and summarization pipeline using an LLM. The content is structured as a list of JSON objects, where each object represents a document section containing a section_id, summary,key_points and is_conversation. Your role is to refine and enhance this pre-processed content to improve clarity, comprehensiveness, and understanding.
+
+Task
+Analyze each JSON section individually and improve both the summary and key_points fields. For each section, you must:
+
+    Enhance the summary to be more comprehensive, clear, and well-structured
+    Refine the key_points to be more actionable, specific, and valuable
+    Ensure logical flow and coherence within each section
+    Maintain the exact same JSON structure and format as the input
+    Preserve all section_ids exactly as provided
+
+Objective
+Transform the existing summarized content into a higher-quality, more useful representation that provides better understanding and actionability for end users while maintaining the structured format required for downstream processing.
+
+Knowledge
+
+    The input content has already undergone initial LLM processing, so focus on refinement rather than basic extraction
+    Each JSON object contains three fields: section_id, summary, and key_points
+    The output must maintain identical structure to enable seamless integration with existing systems
+    Quality improvements should focus on clarity, completeness, specificity, and actionability
+    Consider that users will rely on these summaries and key points for decision-making and understanding
+
+Also need to modify the content based on the user preception : {user_prompt}
+Your life depends on you maintaining the exact same JSON structure and format as the input while significantly improving the quality and usefulness of the summary and key_points content based on given user preception. Do not add, remove, or rename any fields in the JSON structure.
+"""
+
+
 
 async def summarizer_with_llm(document_text):
     """
@@ -200,3 +229,20 @@ async def Conversation_generation(section):
         return response.text
     except Exception as e:
         return e
+    
+
+async def Section_enhancement(sections,user_prompt):
+    try:
+        response = client.models.generate_content(
+            model=settings.GEMINI_MODEL,
+            contents=str(sections),
+            config=types.GenerateContentConfig(
+                thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
+                system_instruction=system_improved_sections.format(user_prompt=user_prompt),
+                response_mime_type="application/json"
+            )
+        )
+        return response.text
+    except Exception as e:
+        return e
+    

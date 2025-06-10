@@ -44,6 +44,6 @@ async def section_generation(payload:Section_creation):
     
     except Exception as e:
         logging.exception(f"Error in Section segragration: {e}")
-        await dump_section_data(None, payload.client_id, payload.link, error=str(e))
+        await dump_section_data(data=None, client_id=payload.client_id, test_id=payload.test_id,link=payload.link, error=str(e))
         return JSONResponse(status_code=500, content={"message": "Internal Server Error"})
 
