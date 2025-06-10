@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 
 
 from dependencies.llm_services import Conversation_generation
-from models.schemas import Conversational
+from models.schemas import Conversational,Questions
 
 from mongodb.retrival import section_retrival_for_conversation
 from mongodb.dumping import dump_conversation
@@ -23,13 +23,14 @@ router=APIRouter()
     - client_id: ID of the client
     - test_id: Test identifier
     - section : Section id
+    - Number_of question: Number of scenario
     """)
-async def conversation(payload : Conversational):
+async def conversation(payload : Questions):
     parser = JsonOutputParser()
     try:
         logging.info("Checking section is eligible for Conversation")
         section_data= await section_retrival_for_conversation(client_id=payload.client_id,test_id=payload.test_id,section_id=payload.section_id)
-        conver_gen= await Conversation_generation(section_data)
+        conver_gen= await Conversation_generation(section=section_data,number_scenario=payload.num_questions)
         try:
             parsed_result =parser.parse(conver_gen)
         except Exception as pe:

@@ -9,7 +9,7 @@ from mongodb.dumping import dump_questions
 from dependencies.llm_services import question_generator
 
 router = APIRouter()
-
+# multiple_choice, single_choice, audio, short_answer
 @router.post(
     "/questions_generate",
     summary="Generate Assessment Questions",
@@ -18,9 +18,9 @@ router = APIRouter()
 
     - client_id: ID of the client
     - section_id: Section index in the document
-    - question_type: 'Single'/'Multiselect'/'Short'
+    - question_type: 'single_choice'/'multiple_choice'/'short_answer'
     - num_questions: Number of questions to generate
-    - num_options: Number of options for single and multiselect questions (ignored for subjective)
+    - num_options: Number of options for single_choice and multiple_choice questions (ignored for subjective)
     """
 )
 async def question_generation(payload: Questions):

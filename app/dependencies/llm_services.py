@@ -77,15 +77,16 @@ Knowledge
 
     Questions and answers must be generated exclusively from the provided information - do not add external knowledge
     The information about how the questions and answers are generated are given below
-    The information will provide the details like type_of_question: ['Multiselect','Single','Short_Answer'] , Number_of_question (the total number of question need to create),Number_of _options(Number of options for the question only eligible for single and Multiselect),
+    The information will provide the details like type_of_question: ['multiple_choice','single_choice','Short_Answer'] , Number_of_question (the total number of question need to create),Number_of _options(Number of options for the question only eligible for single_choice and multiple_choice),
     Information = {ques_info}
-    If the question is Multiselect then we need to have multiple correct answer with given options
-    If the question is Single then we need to have one correct answer in given options
+    If the question is multiple_choice then we need to have multiple correct answer with given options
+    If the question is single_choice then we need to have one correct answer in given options
     Ensure each question is unique and directly traceable to specific content in the provided materials
     For single and multiple questions, ensure all options are plausible and one correct option for single and multiple option for Multiselect
-    For short questions, provide comprehensive answers that demonstrate understanding of the coaching concepts
-    The options are only need to create for single and Multiselect questions
-    For single and multiselect the answer need to be option number starting from 0 in an list
+    For short_answer questions, provide comprehensive answers that demonstrate understanding of the coaching concepts
+    For short_answer questions the answer should be generated based on question and given content information.
+    The options are only need to create for single and multiple_choice questions
+    For single and multiple_choice questions the answer need to be option number starting from 0 in an list
 Output Format
 
 {{
@@ -112,7 +113,7 @@ Critical requirements:
 
 
 
-System_sec_conversation="""
+System_sec_conversation = """
 Situation
 You are working with pre-processed coaching document content that has been extracted and summarized through an initial LLM pipeline. This content needs to be transformed into realistic conversational data's that will be used to evaluate and assess agent performance in coaching scenarios.
 
@@ -122,9 +123,13 @@ Create high-quality conversational data from coaching material sections. Generat
 Objective
 Enable comprehensive agent performance calculation and assessment by creating realistic conversational scenarios that test various agent capabilities across different coaching topics. These datasets will serve as benchmarks for evaluating how well coaching agents can apply knowledge, handle edge cases, and respond to real user needs.
 
-Knowledge
+Information
+The user will provide with the number of scenario's with that need to generate number of conversation with different Scenarios
+info:Number_of_scenario={num_ques}
 
-    Conversations must start with realistic user problems or questions that would naturally arise in coaching contexts
+Knowledge
+    The Scenario need to differnt from each other and need to genearted from given information(summary,keypoints) only
+    Each scenario conversations must start with realistic user problems or questions that would naturally arise in coaching contexts
     Include follow-up questions and clarifications from users to simulate natural conversation flow
     Agent responses must demonstrate practical knowledge application from the coaching material
     Include edge cases and challenging scenarios specifically designed to test agent limits and capabilities
@@ -134,13 +139,38 @@ Knowledge
     Cover realistic user scenarios that would occur in actual coaching sessions
     Ensure sufficient depth in each conversation to thoroughly evaluate agent capabilities
     Test various agent skills including problem-solving, empathy, guidance provision, and knowledge recall
+    Header of the conversation need to be mentioned in Scenario Field
 
 Output_Format
-{
-Conversation:List[String]
-}
+[
+    {{
+        "Scenario": "String",
+        "Conversation": [
+            {{
+                "User": "String"
+            }},
+            {{
+                "Agent": "String"
+            }},
+            ...
+        ]
+    }},
+    {{
+        "Scenario": "String",
+        "Conversation": [
+            {{
+                "User": "String"
+            }},
+            {{
+                "Agent": "String"
+            }},
+            ...
+        ]
+    }}
+]
 
-Your life depends on creating conversations that authentically test agent capabilities while remaining true to realistic coaching interactions - the quality of agent evaluation directly depends on how well these conversations simulate real user needs and challenges."""
+Your life depends on maintaining the correct correct format and creating conversations that authentically test agent capabilities while remaining true to realistic coaching interactions - the quality of agent evaluation directly depends on how well these conversations simulate real user needs and challenges.
+"""
 
 
 system_improved_sections="""
@@ -215,14 +245,14 @@ async def question_generator(section,info):
         return e
     
 
-async def Conversation_generation(section):
+async def Conversation_generation(section,number_scenario):
     try:
         response = client.models.generate_content(
             model=settings.GEMINI_MODEL,
             contents=str(section),
             config=types.GenerateContentConfig(
                 thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
-                system_instruction=System_sec_conversation,
+                system_instruction=System_sec_conversation.format(num_ques=number_scenario),
                 response_mime_type="application/json"
             )
         )
