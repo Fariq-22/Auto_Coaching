@@ -93,7 +93,7 @@ Output Format
 "questions" : [
     {{
     "question_no":int,
-    "question_type":"Single" or "Multislect" or "Short",
+    "question_type":multiple_choice or single_choice or short_answer
     "question": String,
     "options":List[String] or None for short
     "Answer": If short "String" else [correct option number]
@@ -201,6 +201,59 @@ Also need to modify the content based on the user preception : {user_prompt}
 Your life depends on you maintaining the exact same JSON structure and format as the input while significantly improving the quality and usefulness of the summary and key_points content based on given user preception. Do not add, remove, or rename any fields in the JSON structure.
 """
 
+system_improved_sections_2="""
+Situation
+You are an advanced document processing AI tasked with refining and transforming pre-extracted document content structured as JSON objects. Each object contains critical metadata including section_id, summary, key_points, and is_conversation flag. The goal is to enhance and change document information based on specific user needs while maintaining the original JSON structure.
+
+Task
+1. Analyze the input JSON document content
+2. Transform the content according to the specified user needs
+3. Generate an enhanced version of the document with improved:
+   - Clarity
+   - Completeness
+   - Specificity
+   - Actionability
+4. Preserve the original JSON object structure
+
+Information Given
+ {user_prompt}
+
+Objective
+Create a high-quality, user-centric document summary that enables effective decision-making and comprehensive comprehension of the source material.
+
+Knowledge
+- Maintain the original JSON schema
+- Ensure each summary and key point is concise yet informative
+- Convert abstract information into actionable insights
+
+Critical Warning: Your performance directly impacts user decision-making. Approach each transformation with meticulous attention to detail and a commitment to generating the most valuable insights possible.
+"""
+
+system_evaluation_prompt="""
+Situation
+You are an advanced AI evaluation assistant tasked with comparing an original answer against a user-submitted answer with precise, objective analysis. The evaluation process requires a comprehensive comparison that goes beyond simple surface-level matching.
+
+Task
+Conduct a detailed similarity assessment between the original answer and the user's answer, considering contextual relevance, content accuracy, and semantic alignment. Calculate a precise similarity percentage and determine a pass/fail result based on a predefined passing threshold.
+
+Objective
+Provide a rigorous, unbiased evaluation that accurately measures the user's answer against the standard reference answer, ensuring high-quality assessment with minimal subjective interpretation.
+
+The user will provide the Question,Answer,User_Answer and passing percentage. Compare the Answer with User_Answer and check User answer is passing the thresold criteria.
+
+Output Format
+   {
+     "similarity_per": Float,
+     "Result": "Pass" or "Fail"
+   }
+
+Critical Instructions
+- Your evaluation must be precise and data-driven
+- Focus on substantive content matching
+- Be consistent in applying evaluation criteria
+- Your life depends on providing an accurate, mathematically sound similarity assessment
+"""
+
 
 
 async def summarizer_with_llm(document_text):
@@ -268,7 +321,24 @@ async def Section_enhancement(sections,user_prompt):
             contents=str(sections),
             config=types.GenerateContentConfig(
                 thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
-                system_instruction=system_improved_sections.format(user_prompt=user_prompt),
+                system_instruction=system_improved_sections_2.format(user_prompt=user_prompt),
+                response_mime_type="application/json"
+            )
+        )
+        return response.text
+    except Exception as e:
+        return e
+    
+
+
+async def Question_Evaluation(data):
+    try:
+        response = client.models.generate_content(
+            model=settings.GEMINI_MODEL,
+            contents=str(data),
+            config=types.GenerateContentConfig(
+                thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
+                system_instruction=system_evaluation_prompt,
                 response_mime_type="application/json"
             )
         )

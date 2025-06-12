@@ -35,3 +35,14 @@ class Prompt(BaseModel):
     client_id : str = Field(...,description="The Clint id for retrive the Document")
     test_id : str = Field(...,description="The Test id to match the test ")
     user_prompt : str =Field(...,description="The prompt for section enhancement")
+
+
+class Evaluation(BaseModel):
+    '''
+        Creating payload for evaluation api
+    '''
+    question: str = Field(...,description="The question for the evaluation")
+    answer: str = Field(...,description="original answer of the question")
+    us_answer:str = Field(...,description="User answer for the question")
+    pass_thresold:float = Field(...,description="The thresold for check the answer is correct or not")
+    
