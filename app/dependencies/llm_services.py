@@ -1,7 +1,7 @@
 from google import genai
 from google.genai import types
 from core.config import settings
-
+from typing import List,Dict,Any
 # Initialize Gemini Client
 client= genai.Client(api_key=settings.GOOGLE_API_KEY)
 
@@ -234,26 +234,82 @@ Situation
 You are an advanced AI evaluation assistant tasked with comparing an original answer against a user-submitted answer with precise, objective analysis. The evaluation process requires a comprehensive comparison that goes beyond simple surface-level matching.
 
 Task
-Conduct a detailed similarity assessment between the original answer and the user's answer, considering contextual relevance, content accuracy, and semantic alignment. Calculate a precise similarity percentage and determine a pass/fail result based on a predefined passing threshold.
+Conduct a detailed similarity assessment between the original answer and the user's answer with provided list of documents, considering contextual relevance, content accuracy, and semantic alignment. Calculate a precise similarity percentage and determine the mark for the each documents .
 
 Objective
-Provide a rigorous, unbiased evaluation that accurately measures the user's answer against the standard reference answer, ensuring high-quality assessment with minimal subjective interpretation.
+  1)Provide a rigorous, unbiased evaluation that accurately measures the user's answer against the standard reference answer, ensuring high-quality assessment with minimal subjective interpretation.
+  2)The user will provide the batch of {batch_size} documents or less than that.
+  3)Go through each documents and make evaluation sincerely with user answer with refernce answer with respect to question
+  4)Provide the output in given format
 
-The user will provide the Question,Answer,User_Answer and passing percentage. Compare the Answer with User_Answer and check User answer is passing the thresold criteria.
+Input Format
+[{{
+    "ans_id":int,
+    "question":str,
+    "answer":str,
+    "user_answer":str,
+    "total_mark":float
+}},
+]
 
 Output Format
-   {
-     "similarity_per": Float,
+
+   {{
+     "ans_id" : int,
+     "mark": Float,
      "Result": "Pass" or "Fail"
-   }
+   }}
+
 
 Critical Instructions
 - Your evaluation must be precise and data-driven
-- Focus on substantive content matching
-- Be consistent in applying evaluation criteria
-- Your life depends on providing an accurate, mathematically sound similarity assessment
+- Your life depends on assigning correct mark and providing the response in mentioned format
 """
 
+
+
+system_evaluation_conversation_prompt="""
+Situation
+You are operating as a professional conversation evaluator in an assessment environment where human agents are being tested on their customer service and problem-solving capabilities. You will be comparing original benchmark conversations against human agent performance to determine how effectively the human agents handle identical user queries and problems.
+
+Task
+Evaluate human agent conversation performance by comparing their responses to original benchmark conversations. For each conversation pair provided, you must analyze how well the human agent addressed the user's query, solved their problem, and maintained conversation quality. Assign a numerical score based on the total marks available and return the results in the specified JSON format.
+
+Objective
+Provide accurate, consistent, and fair evaluation scores that reflect the human agent's performance quality relative to the original conversation benchmark. These scores will be used to assess agent competency and identify areas for improvement in customer service delivery.
+
+Knowledge
+You will receive input data containing:
+
+[{
+- ans_id: Unique identifier for each conversation pair
+- Total_mark: Maximum possible score for the evaluation
+- original_conversation: Benchmark conversation showing optimal handling of the user query
+- Human_agent_conversation: The human agent's attempt at handling the same user query
+}
+,
+]
+Your evaluation criteria should focus on:
+- Problem resolution effectiveness
+- Communication clarity and professionalism
+- Response relevance to user needs
+- Conversation flow and structure
+- Completeness of information provided
+- User satisfaction potential
+
+Your life depends on you carefully analyzing both conversations to understand the user's specific problem and comparing how effectively the human agent addressed it versus the original benchmark.
+
+You must output results in this exact JSON format:
+
+[
+{
+ans_id: int,
+mark: float,
+feedback:str
+}
+]
+
+"""
 
 
 async def summarizer_with_llm(document_text):
@@ -331,7 +387,23 @@ async def Section_enhancement(sections,user_prompt):
     
 
 
-async def Question_Evaluation(data):
+async def Question_Evaluation(data:List[Dict[str,Any]],batch_size:int):
+    try:
+        response = client.models.generate_content(
+            model=settings.GEMINI_MODEL,
+            contents=str(data),
+            config=types.GenerateContentConfig(
+                thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
+                system_instruction=system_evaluation_prompt.format(batch_size=batch_size),
+                response_mime_type="application/json"
+            )
+        )
+        return response.text
+    except Exception as e:
+        return e
+    
+
+async def Conversation_Evaluation(data:List[Dict[str,Any]]):
     try:
         response = client.models.generate_content(
             model=settings.GEMINI_MODEL,

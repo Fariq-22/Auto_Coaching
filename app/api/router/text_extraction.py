@@ -6,9 +6,11 @@ from fastapi.responses import JSONResponse
 from models.schemas import Section_creation
 from utils.file_utils import download_with_presigned
 from utils.text_utils import text_extract
+from utils.existing import existing_section_info
 
 from dependencies.llm_services import summarizer_with_llm
 from mongodb.dumping import dump_section_data
+from mongodb.retrival import all_section_retrive_enhance
 
 router = APIRouter()
 
@@ -22,13 +24,25 @@ router = APIRouter()
     - link : List of linkS
     """)
 async def section_generation(payload:Section_creation):
+
     parser = JsonOutputParser()
+    try:
+
+        if await existing_section_info(client_id=payload.client_id,test_id=payload.test_id,links=payload.link):
+            sections= await all_section_retrive_enhance(client_id=payload.client_id,test_id=payload.test_id)
+            logging.info("The data is retrived from the mongoDB")
+            return JSONResponse(status_code=200, content=sections)
+        
+    except Exception as e:
+
+        JSONResponse(status_code=500, content={"message": "error occured in the using of existing data"})
+
     try:
         logging.info(f"processing {payload.link}")
         all_text=""
         for li in payload.link:
             download_file_from_s3 = await download_with_presigned(li)
-            extracted_text =await text_extract(download_file_from_s3) #TODO: make async
+            extracted_text =await text_extract(download_file_from_s3) 
             all_text+=extracted_text
         raw_result = await summarizer_with_llm(all_text)
         try:

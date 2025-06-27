@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 
 
 from dependencies.llm_services import Conversation_generation
-from models.schemas import Conversational,Questions
+from models.schemas import Questions
 
 from mongodb.retrival import section_retrival_for_conversation
 from mongodb.dumping import dump_conversation

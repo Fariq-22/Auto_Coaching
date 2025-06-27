@@ -26,7 +26,7 @@ router = APIRouter()
 async def section_enhance(payload: Prompt):
     parser = JsonOutputParser()
     try:
-        data= await all_section_retrive_enhance(payload.client_id,payload.test_id)
+        data= await all_section_retrive_enhance(client_id=payload.client_id,test_id=payload.test_id)
         sec_enhance= await Section_enhancement(sections=data,user_prompt=payload.user_prompt)
         sucess=await delete_older_sections(client_id=payload.client_id,test_id=payload.test_id)
         if sucess:

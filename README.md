@@ -1,33 +1,29 @@
-# Auto_Coaching
-
-
+README.md
 app/
-├── api/
-│   ├── router/
-│   │   ├── text_extraction.py
-│   │   ├── conversation_generation.py
-│   │   ├── text_evaluation.py
-│   │   ├── question_generation.py
-│   └── __init__.py
-│
-├── dependencies/
-│   └── llm_services.py
-│
-├── models/
-│   └── schemas.py
-│
-├── mongodb/
-│   └── client.py
-|   ----- retival.py
-│
-├── utils/
-│   ├── file_utils.py
-│   └── text_utils.py
-│
-├── core/
-│   ├── config.py
-│   └── logging.py
-│
-├── main.py
-└── __init__.py
+  __init__.py
+  main.py
+  api/
+    __init__.py
+    router/
+      conversation_generation.py
+      promt_section.py
+      question_evaluation.py
+      question_generation.py
+      text_extraction.py
+  core/
+    config.py
+    logging.py
+  dependencies/
+    llm_services.py
+  models/
+    schemas.py
 
+  mongodb/
+    client.py
+    deleting.py
+    dumping.py
+    retrival.py
+  utils/
+    existing.py
+    file_utils.py
+    text_utils.py

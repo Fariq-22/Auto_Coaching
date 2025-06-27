@@ -26,7 +26,7 @@ router = APIRouter()
 async def question_generation(payload: Questions):
     parser = JsonOutputParser()
     try:
-        section= await section_retrieval_for_question_gen(payload.client_id,payload.test_id,payload.section_id)
+        section= await section_retrieval_for_question_gen(client_id=payload.client_id,test_id=payload.test_id,section_id=payload.section_id)
         ques_info={"type_of_question":payload.question_type,"num_questions":payload.num_questions,"num_options":payload.num_options}
         ques_generation=await question_generator(section=section,info=ques_info)
         logging.info("Storing the data in mongo db")

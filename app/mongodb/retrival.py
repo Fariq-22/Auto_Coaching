@@ -57,3 +57,30 @@ async def all_section_retrive_enhance(client_id,test_id):
     if not doc:
         raise HTTPException(status_code=404, detail="Sections are not founded")
     return doc["sections"]
+
+
+async def retrive_links(client_id,test_id):
+    _, db = get_mongodb_connection()
+
+    doc = await db["Document_Sections"].find_one(
+        {
+            "client_id": client_id,
+            "test_id": test_id,
+        }
+    )
+
+    if not doc:
+        return False
+    return doc["link"]
+
+
+
+async def document_exists(client_id, test_id):
+    _, db = get_mongodb_connection()
+
+    doc = await db["Document_Sections"].find_one({
+        "client_id": client_id,
+        "test_id": test_id,
+    }, {"_id": 1})  # Only fetch _id to optimize query
+
+    return doc is not None

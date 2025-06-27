@@ -1,6 +1,5 @@
 from pydantic import BaseModel,Field
-from typing import Optional,List
-
+from typing import Optional,List,Dict, Any
 
 class Section_creation(BaseModel):
     client_id :str = Field(...,description="The client id to retrive the documents")
@@ -37,12 +36,15 @@ class Prompt(BaseModel):
     user_prompt : str =Field(...,description="The prompt for section enhancement")
 
 
+
 class Evaluation(BaseModel):
     '''
-        Creating payload for evaluation api
+        Creating payload for evaluation API
     '''
-    question: str = Field(...,description="The question for the evaluation")
-    answer: str = Field(...,description="original answer of the question")
-    us_answer:str = Field(...,description="User answer for the question")
-    pass_thresold:float = Field(...,description="The thresold for check the answer is correct or not")
+    client_id : str = Field(...,description="The client id")
+    test_id : str = Field(...,description="The test id")
+    question_answer: List[Dict[str, Any]] = Field(..., description="List of JSON objects as question and answer information")
+    conversation: List[Dict[str, Any]] = Field(..., description="List of JSON objects as conversation information")
+
+
     

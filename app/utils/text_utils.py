@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 import fitz 
 from io import BytesIO
-
+from typing import List
 
 
 
@@ -56,4 +56,11 @@ async def text_extract(pdf_stream):
 
     doc.close()
     return full_text
+
+
+
+async def checking_links(retrived_link:List[str],processing_link:List[str]) -> bool:
+    return set(processing_link) == set(retrived_link)
+
+
 
