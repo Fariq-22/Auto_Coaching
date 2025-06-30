@@ -59,8 +59,5 @@ async def text_extract(pdf_stream):
 
 
 
-async def checking_links(retrived_link:List[str],processing_link:List[str]) -> bool:
-    return set(processing_link) == set(retrived_link)
-
 
 

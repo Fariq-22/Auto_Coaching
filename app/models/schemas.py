@@ -44,7 +44,6 @@ class Evaluation(BaseModel):
     client_id : str = Field(...,description="The client id")
     test_id : str = Field(...,description="The test id")
     question_answer: List[Dict[str, Any]] = Field(..., description="List of JSON objects as question and answer information")
-    conversation: List[Dict[str, Any]] = Field(..., description="List of JSON objects as conversation information")
-
+    conversation: Optional[List[Dict[str, Any]]] = Field(None, description="List of JSON objects as conversation information")
 
     

@@ -12,7 +12,7 @@ from mongodb.retrival import section_retrival_for_conversation
 from mongodb.dumping import dump_conversation
 
 
-router=APIRouter()
+router=APIRouter(tags=["Auto_Coaching"])
 
 
 

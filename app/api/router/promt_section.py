@@ -11,7 +11,7 @@ from mongodb.deleting import delete_older_sections
 
 from dependencies.llm_services import Section_enhancement
 
-router = APIRouter()
+router = APIRouter(tags=["Auto_Coaching"])
 
 @router.post(
     "/section_enhance",

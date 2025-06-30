@@ -14,7 +14,7 @@ from core.config import settings
 from models.schemas import Evaluation
 from mongodb.dumping import dump_evaluation
 
-router = APIRouter()
+router = APIRouter(tags=["Auto_Coaching"])
 
 
 
@@ -22,29 +22,37 @@ async def processing(
     data: List[Dict[str, Any]],
     batch_size: int = settings.batch_size
 ) -> List[Dict[str, Any]]:
-    """
-    Iterate over `data` in chunks of `batch_size`, call the LLM,
-    parse JSON output and accumulate results.
-    """
     parser = JsonOutputParser()
     pointer = 0
     processed: List[Dict[str, Any]] = []
+
     while pointer < len(data):
         logging.info("Batch processing started")
         batch_slice = data[pointer : pointer + batch_size]
 
-        # 1) call your LLM service
         raw = await Question_Evaluation(data=batch_slice, batch_size=batch_size)
         logging.info("Raw batch response received")
+        print("raw", raw)
 
-        # 2) parse it
         parsed = parser.parse(raw)
         logging.info("Batch response parsed")
+        print("parsed", parsed)
 
-        processed.extend(parsed)
+        # Flatten if parsed is list of lists
+        if isinstance(parsed, list):
+            for item in parsed:
+                if isinstance(item, list):
+                    processed.extend(item)  # flatten inner list
+                else:
+                    processed.append(item)
+        else:
+            processed.append(parsed)
+
         pointer += batch_size
+        print("processed", processed)
 
     return processed
+
     
 
 async def batch_question_evaluation(payload: Evaluation):
@@ -67,6 +75,9 @@ async def batch_question_evaluation(payload: Evaluation):
             "question_result": results,
             "conversation_result":conversation
         }
+
+        print(results)
+        print(conversation)
         await dump_evaluation(client_id = payload.client_id,test_id = payload.test_id , question_eval=results,conv_eval=conversation)
 
         resp = requests.post(settings.callback_url, json=callback_payload)

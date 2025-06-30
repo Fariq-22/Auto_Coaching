@@ -2,6 +2,8 @@ from mongodb.client import get_mongodb_connection
 import uuid
 import datetime
 from typing import Dict,List
+
+
 async def dump_section_data(data, client_id, test_id, link,error=None):
     _, db = get_mongodb_connection()
     document = {
@@ -55,6 +57,7 @@ async def dump_evaluation(client_id:str,test_id:str,question_eval:List[Dict],con
         "test_id":test_id,
         "Question_Evaluation":question_eval,
         "Conversation_Evaluation":conv_eval,
+        "updated_at": datetime.datetime.now().isoformat(),
         "error": error
         }
     await db["Result_Evaluation"].insert_one(document)
