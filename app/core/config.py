@@ -13,3 +13,7 @@ class Settings(BaseSettings):
         env_file = "/home/fariq.rahman/work/Coaching/Auto_Coaching/.env"
 
 settings = Settings()
+
+#example of how to use the settings
+#  class Config:
+#         env_file = "path_of_your_env_file/.env"

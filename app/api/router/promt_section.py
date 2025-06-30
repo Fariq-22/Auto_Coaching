@@ -39,6 +39,8 @@ async def section_enhance(payload: Prompt):
                 return JSONResponse(status_code=500, content={"message": "Invalid response format from LLM"})
 
             await dump_section_data(data=parsed_result, client_id=payload.client_id, test_id=payload.test_id,link=None)
+            logging.info(f"Storing the enhanced sections in MongoDB for client_id={payload.client_id}, test_id={payload.test_id} is completed")
+    
             return JSONResponse(status_code=200, content=parsed_result)
         else:
             logging.warning(f"Failed to delete old sections for client_id={payload.client_id}, test_id={payload.test_id}")

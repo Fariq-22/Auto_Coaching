@@ -32,11 +32,9 @@ async def processing(
 
         raw = await Question_Evaluation(data=batch_slice, batch_size=batch_size)
         logging.info("Raw batch response received")
-        print("raw", raw)
 
         parsed = parser.parse(raw)
         logging.info("Batch response parsed")
-        print("parsed", parsed)
 
         # Flatten if parsed is list of lists
         if isinstance(parsed, list):
@@ -49,8 +47,7 @@ async def processing(
             processed.append(parsed)
 
         pointer += batch_size
-        print("processed", processed)
-
+        logging.info(f"Processed {len(processed)} items so far")
     return processed
 
     
@@ -75,9 +72,8 @@ async def batch_question_evaluation(payload: Evaluation):
             "question_result": results,
             "conversation_result":conversation
         }
-
-        print(results)
-        print(conversation)
+        logging.info(f"Dumping evaluation for {payload.client_id}/{payload.test_id}")
+        # Store the evaluation results in MongoDB
         await dump_evaluation(client_id = payload.client_id,test_id = payload.test_id , question_eval=results,conv_eval=conversation)
 
         resp = requests.post(settings.callback_url, json=callback_payload)
@@ -109,6 +105,7 @@ async def question_ans_evaluation(
 ):
     # schedule and return right away
     background_tasks.add_task(batch_question_evaluation, payload)
+    logging.info(f"Evaluation started for {payload.client_id}/{payload.test_id}")
     return JSONResponse(
         status_code=202,
         content={"message": "Evaluation started; results will be sent to callback_url."}

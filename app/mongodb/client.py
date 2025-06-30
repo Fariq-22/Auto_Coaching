@@ -11,7 +11,11 @@ mongo_db = None
 
 def get_mongodb_connection():
     """
-    Returns an async Motor client and db instance.
+    Establishes a connection to the MongoDB database using the provided URI and database name from settings.
+    If the connection is already established, it returns the existing client and db instance.
+    :return: Tuple of (MongoClient, Database)
+    :raises ConnectionFailure: If the connection to MongoDB fails.
+    :raises Exception: For any other exceptions that may occur during connection.
     """
     global mongo_client, mongo_db
 

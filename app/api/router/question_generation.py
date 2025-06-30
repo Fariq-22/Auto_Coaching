@@ -65,6 +65,7 @@ async def question_generation(payload: Questions):
             return JSONResponse(status_code=500, content={"message": "Invalid response format from LLM"})
 
         await dump_questions(questions=parsed_result, client_id=payload.client_id, test_id=payload.test_id, section_id=payload.section_id)
+        logger.info(f"Question generation data is dumped for client_id={payload.client_id}, test_id={payload.test_id}, section_id={payload.section_id}")
         return JSONResponse(status_code=200, content=parsed_result)
 
     except Exception as e:

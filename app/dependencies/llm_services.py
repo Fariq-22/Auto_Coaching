@@ -2,6 +2,8 @@ from google import genai
 from google.genai import types
 from core.config import settings
 from typing import List,Dict,Any
+
+
 # Initialize Gemini Client
 client= genai.Client(api_key=settings.GOOGLE_API_KEY)
 
@@ -62,7 +64,7 @@ Ensure your response contains only the JSON output with no additional text, expl
 """
 
 
-
+# System prompt for question generation
 System_Question="""
 Situation
 You are a Question and Answer Generator tasked with creating assessment questions from agent coaching documents. You will be working with summarized information with summaries and key points, all derived from agent coaching materials used for performance evaluation.
@@ -112,7 +114,7 @@ Critical requirements:
 """
 
 
-
+# System prompt for conversation generation
 System_sec_conversation = """
 Situation
 You are working with pre-processed coaching document content that has been extracted and summarized through an initial LLM pipeline. This content needs to be transformed into realistic conversational data's that will be used to evaluate and assess agent performance in coaching scenarios.
@@ -172,7 +174,7 @@ Output_Format
 Your life depends on maintaining the correct correct format and creating conversations that authentically test agent capabilities while remaining true to realistic coaching interactions - the quality of agent evaluation directly depends on how well these conversations simulate real user needs and challenges.
 """
 
-
+# System prompt for section enhancement
 system_improved_sections="""
 Situation
 You are working with document content that has already been processed through an initial extraction and summarization pipeline using an LLM. The content is structured as a list of JSON objects, where each object represents a document section containing a section_id, summary,key_points and is_conversation. Your role is to refine and enhance this pre-processed content to improve clarity, comprehensiveness, and understanding.
@@ -201,6 +203,8 @@ Also need to modify the content based on the user preception : {user_prompt}
 Your life depends on you maintaining the exact same JSON structure and format as the input while significantly improving the quality and usefulness of the summary and key_points content based on given user preception. Do not add, remove, or rename any fields in the JSON structure.
 """
 
+# System prompt for section enhancement with user perception
+# This prompt is used to enhance sections based on user feedback or specific requirements.
 system_improved_sections_2="""
 Situation
 You are an advanced document processing AI tasked with refining and transforming pre-extracted document content structured as JSON objects. Each object contains critical metadata including section_id, summary, key_points, and is_conversation flag. The goal is to enhance and change document information based on specific user needs while maintaining the original JSON structure.
@@ -229,6 +233,7 @@ Knowledge
 Critical Warning: Your performance directly impacts user decision-making. Approach each transformation with meticulous attention to detail and a commitment to generating the most valuable insights possible.
 """
 
+# System prompt for evaluation of question answers
 system_evaluation_prompt="""
 Situation
 You are an advanced AI evaluation assistant tasked with comparing an original answer against a user-submitted answer with precise, objective analysis. The evaluation process requires a comprehensive comparison that goes beyond simple surface-level matching.
@@ -267,7 +272,7 @@ Critical Instructions
 """
 
 
-
+# System prompt for conversation evaluation
 system_evaluation_conversation_prompt="""
 Situation
 You are operating as a professional conversation evaluator in an assessment environment where human agents are being tested on their customer service and problem-solving capabilities. You will be comparing original benchmark conversations against human agent performance to determine how effectively the human agents handle identical user queries and problems.
@@ -312,109 +317,43 @@ feedback:str
 """
 
 
+def _call_llm(content, system_instruction):
+    """
+    Helper to call Gemini LLM with consistent config and error handling.
+    Args:
+        content (str): The content to be processed by the LLM.
+        system_instruction (str): The system instruction to guide the LLM's response.
+    Returns:
+        str: The response text from the LLM, or an error message if the call fails
+    """
+    try:
+        response = client.models.generate_content(
+            model=settings.GEMINI_MODEL,
+            contents=content,
+            config=types.GenerateContentConfig(
+                thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET), #Set tthinking budget for the LLM
+                system_instruction=system_instruction,
+                response_mime_type="application/json"
+            )
+        )
+        return response.text
+    except Exception as e:
+        return e
+
 async def summarizer_with_llm(document_text):
-    """
-    Use Gemini model to analyze and summarize the given document text
-    into logical sections with summaries and key points.
-    """
-    try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=document_text,
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
-                system_instruction=SECTION_ANALYSIS_PROMPT,
-                response_mime_type="application/json"
-            )
-        )
-        return response.text
-    except Exception as e:
-        return e
+    return _call_llm(document_text, SECTION_ANALYSIS_PROMPT)
 
+async def question_generator(section, info):
+    return _call_llm(str(section), System_Question.format(ques_info=info))
 
-async def question_generator(section,info):
-    '''
-    The information for info
-      type_of_question
-      Number of question
-      number of options if single or multiselect
-    '''
-    try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=str(section),
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
-                system_instruction=System_Question.format(ques_info=info),
-                response_mime_type="application/json"
-            )
-        )
-        return response.text
-    except Exception as e:
-        return e
-    
+async def Conversation_generation(section, number_scenario):
+    return _call_llm(str(section), System_sec_conversation.format(num_ques=number_scenario))
 
-async def Conversation_generation(section,number_scenario):
-    try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=str(section),
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
-                system_instruction=System_sec_conversation.format(num_ques=number_scenario),
-                response_mime_type="application/json"
-            )
-        )
-        return response.text
-    except Exception as e:
-        return e
-    
+async def Section_enhancement(sections, user_prompt):
+    return _call_llm(str(sections), system_improved_sections_2.format(user_prompt=user_prompt))
 
-async def Section_enhancement(sections,user_prompt):
-    try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=str(sections),
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
-                system_instruction=system_improved_sections_2.format(user_prompt=user_prompt),
-                response_mime_type="application/json"
-            )
-        )
-        return response.text
-    except Exception as e:
-        return e
-    
+async def Question_Evaluation(data: List[Dict[str, Any]], batch_size: int):
+    return _call_llm(str(data), system_evaluation_prompt.format(batch_size=batch_size))
 
-
-async def Question_Evaluation(data:List[Dict[str,Any]],batch_size:int):
-    try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=str(data),
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
-                system_instruction=system_evaluation_prompt.format(batch_size=batch_size),
-                response_mime_type="application/json"
-            )
-        )
-        return response.text
-    except Exception as e:
-        return e
-    
-
-async def Conversation_Evaluation(data:List[Dict[str,Any]]):
-    try:
-        response = client.models.generate_content(
-            model=settings.GEMINI_MODEL,
-            contents=str(data),
-            config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=settings.THINKING_BUDGET),
-                system_instruction=system_evaluation_prompt,
-                response_mime_type="application/json"
-            )
-        )
-        return response.text
-    except Exception as e:
-        return e
-    
+async def Conversation_Evaluation(data: List[Dict[str, Any]]):
+    return _call_llm(str(data), system_evaluation_prompt)

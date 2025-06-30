@@ -2,6 +2,11 @@ from mongodb.client import get_mongodb_connection
 from fastapi import APIRouter , HTTPException
 
 async def section_retrieval_for_question_gen(client_id, test_id, section_id):
+    """
+    Retrieves a specific section from the Document_Sections collection for question generation.
+    - client_id: ID of the client
+    - test_id: ID of the test
+    - section_id: ID of the section to retrieve"""
     _, db = get_mongodb_connection()
 
     doc = await db["Document_Sections"].find_one(
@@ -23,6 +28,12 @@ async def section_retrieval_for_question_gen(client_id, test_id, section_id):
 
 
 async def section_retrival_for_conversation(client_id, test_id, section_id):
+    """
+    Retrieves a specific section from the Document_Sections collection for conversation generation.
+    - client_id: ID of the client
+    - test_id: ID of the test
+    - section_id: ID of the section to retrieve"""
+
     _, db = get_mongodb_connection()
 
     doc = await db["Document_Sections"].find_one(
@@ -45,6 +56,11 @@ async def section_retrival_for_conversation(client_id, test_id, section_id):
 
 
 async def all_section_retrive_enhance(client_id,test_id):
+    """
+    Retrieves all sections from the Document_Sections collection for a given client and test.
+    - client_id: ID of the client
+    - test_id: ID of the test"""
+
     _, db = get_mongodb_connection()
 
     doc = await db["Document_Sections"].find_one(
@@ -60,6 +76,10 @@ async def all_section_retrive_enhance(client_id,test_id):
 
 
 async def retrive_links(client_id,test_id):
+    """
+    Retrieves the links associated with a specific client and test from the Document_Sections collection.
+    - client_id: ID of the client
+    - test_id: ID of the test"""
     _, db = get_mongodb_connection()
 
     doc = await db["Document_Sections"].find_one(
@@ -76,6 +96,10 @@ async def retrive_links(client_id,test_id):
 
 
 async def document_exists(client_id, test_id):
+    """
+    Checks if a document exists for the given client_id and test_id in the Document_Sections collection.
+    - client_id: ID of the client
+    - test_id: ID of the test"""
     _, db = get_mongodb_connection()
 
     doc = await db["Document_Sections"].find_one({
